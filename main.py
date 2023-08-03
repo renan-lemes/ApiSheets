@@ -1,7 +1,5 @@
 from __future__ import print_function
 
-import os.path
-
 # import pandas as pd
 # import numpy as np
 
@@ -11,11 +9,8 @@ from google_auth_oauthlib.flow import InstalledAppFlow
 from googleapiclient.discovery import build
 from googleapiclient.errors import HttpError
 
-
-class GoogleSheets ():
+class GoogleSheets:
     
-    
-        
     def Conection (self,args):
         pass
 
