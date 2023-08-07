@@ -36,11 +36,11 @@ app = FastAPI()
 
 app = FastAPI()
 
-def Read_Sheets (SAMPLE_SPREADSHEET_ID, SAMPLE_RANGE_NAME, creds):
+def Read_Sheets (SAMPLE_SPREADSHEET_ID, creds):
     service = build('sheets', 'v4', credentials=creds)
     sheet = service.spreadsheets() ## Pegou o arquivo inteiro 
-    result = sheet.values().get(spreadsheetId=SAMPLE_SPREADSHEET_ID,range=SAMPLE_RANGE_NAME).execute() ## aqui que passo qual planilha quero ler e qual intervalo de celulas vou ler
-    values = result.get('values', []) ## esse cara que diz se quero pegar os valores ou estilização do google
+    result = sheet.values().get(spreadsheetId=SAMPLE_SPREADSHEET_ID, range='vendas!A1:D11').execute()
+    values = result.get('values', [])
 
     return values
 
@@ -69,13 +69,13 @@ def Conection (SCOPES = ['https://www.googleapis.com/auth/spreadsheets']):
 
 
 @app.get("/read_google_sheet/")
-async def read_google_sheet(sheet_id: str, range_plan:str):
+async def read_google_sheet(sheet_id: str):
 
     
     # Conectar ao Google Sheets
     client = Conection()
     # print(client)
-    data = Read_Sheets(sheet_id,range_plan, client)
+    data = Read_Sheets(sheet_id, client)
 
     return {"data": data}
 
