@@ -6,11 +6,20 @@ from fastapi import FastAPI
 # import pandas as pd
 # import numpy as np
 
-from google.auth.transport.requests import Request
+# from google.auth.transport.requests import Request
+# from google.oauth2.credentials import Credentials
+# from google_auth_oauthlib.flow import InstalledAppFlow
+# from googleapiclient.discovery import build
+# from googleapiclient.errors import HttpError
+
+
+
+
+import gspread
 from google.oauth2.credentials import Credentials
-from google_auth_oauthlib.flow import InstalledAppFlow
-from googleapiclient.discovery import build
-from googleapiclient.errors import HttpError
+from google.auth.transport.requests import Request
+# from google.oauth2.service_account import Credentials
+
 import json
 import os
 
@@ -22,32 +31,25 @@ app = FastAPI()
 '''
 
 def Conection (SCOPES = 'https://www.googleapis.com/auth/spreadsheets'):
+    scope = SCOPES
+
+    # Carregar as credenciais do arquivo JSON
     creds = None
-    
-    # The file token.json stores the user's access and refresh tokens, and is
-    # created automatically when the authorization flow completes for the first
-    # time.
+    if creds and creds.valid:
+        creds.refresh(Request())
+    else:
+        creds = Credentials.from_authorized_user_info(
+            "token.json", scopes=scope
+        )
 
-    if os.path.exists('C:\\Users\\RenanLemes\\Desktop\\Projeto_\\ApiSheet\\token.json'):
-        creds = Credentials.from_authorized_user_file('C:\\Users\\RenanLemes\\Desktop\\Projeto_\\ApiSheet\\token.json', SCOPES)
-    # If there are no (valid) credentials available, let the user log in.
-    if not creds or not creds.valid:
-        if creds and creds.expired and creds.refresh_token:
-            creds.refresh(Request())
-        else:
-            flow = InstalledAppFlow.from_client_secrets_file(
-                'client_secret.json', SCOPES)
-            creds = flow.run_local_server(port=0)
-        # Save the credentials for the next run
-        with open('token.json', 'w') as token:
-            token.write(creds.to_json())
+    client = gspread.authorize(creds)
+    return client
 
-    return creds
 
 
 ## interesante o fastapi 
 @app.post('/SheetsPull') 
-def SheetsPull (data:dict):
+async def SheetsPull (data:dict):
     cred = Conection()
 
     return {"value":'ok'}
