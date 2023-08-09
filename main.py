@@ -3,7 +3,7 @@
     Importando as libs
 '''
 from fastapi import FastAPI
-# import pandas as pd
+import pandas as pd
 # import numpy as np
 
 from google.auth.transport.requests import Request
@@ -36,10 +36,10 @@ app = FastAPI()
 
 app = FastAPI()
 
-def Read_Sheets (SAMPLE_SPREADSHEET_ID, creds):
+def Read_Sheets (SAMPLE_SPREADSHEET_ID, creds, range_page='Página1!A1:Z10000'):
     service = build('sheets', 'v4', credentials=creds)
     sheet = service.spreadsheets() ## Pegou o arquivo inteiro 
-    result = sheet.values().get(spreadsheetId=SAMPLE_SPREADSHEET_ID, range='vendas!A1:D11').execute()
+    result = sheet.values().get(spreadsheetId=SAMPLE_SPREADSHEET_ID, range=range_page).execute()
     values = result.get('values', [])
 
     return values
@@ -81,20 +81,21 @@ def QueryAll (sheet_id, client,col, valor):
 
 
 '''  
-    Ler planilha com base em um range do usuario
+    Ler planilha com base em um range do usuario 
+    Futuramente posso alterar os dados como eu bem queira
 '''
 @app.get("/readsheet/")
-async def read_google_sheet(sheet_id: str):
+async def read_google_sheet(sheet_id: str, range_pag:str):
     
     # Conectar ao Google Sheets
     client = Conection()
     # print(client)
-    data = Read_Sheets(sheet_id, client)
+    data = Read_Sheets(sheet_id, client, range_pag)
 
     return {"data": data}
 
 
-'''  
+'''
     Pegar dados especifico do googlesheets
 '''
 @app.get('/querysheet')
@@ -109,7 +110,7 @@ async def query_sheet(sheet_id:str, col:str, valor: str):
 
 
 ''' 
-    Inserte de dados por lote
+    Inserte de dados por em lote
 '''
 @app.post('/insertsheet')
 async def insert_sheet(sheet_id:str, name_pla:str, data:list):
@@ -117,7 +118,7 @@ async def insert_sheet(sheet_id:str, name_pla:str, data:list):
 
 
 ''' 
-    Inserte de dados unico
+    Inserte de dados unico em uma coluna especifica
 '''
 @app.post('/insertsheetone')
 async def insert_sheet(sheet_id:str, name_pla:str, data:list):
