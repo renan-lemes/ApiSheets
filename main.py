@@ -67,10 +67,24 @@ def Conection (SCOPES = ['https://www.googleapis.com/auth/spreadsheets']):
     
     return creds
 
+def QueryAll (sheet_id, client,col, valor):
+    
+    
+    service = build('sheets', 'v4', credentials=client) 
+    sheet = service.spreadsheets()
+    query = f'SELECT * WHERE {col} = {valor}'
+    
+    result = sheet.values().get(spreadsheetId=sheet_id, filter = query).execute()
+    values = result.get('values', [])
 
-@app.get("/read_google_sheet/")
+    return values
+
+
+'''  
+    Ler planilha com base em um range do usuario
+'''
+@app.get("/readsheet/")
 async def read_google_sheet(sheet_id: str):
-
     
     # Conectar ao Google Sheets
     client = Conection()
@@ -79,7 +93,37 @@ async def read_google_sheet(sheet_id: str):
 
     return {"data": data}
 
-    
+
+'''  
+    Pegar dados especifico do googlesheets
+'''
+@app.get('/querysheet')
+async def query_sheet(sheet_id:str, col:str, valor: str):
+    # Primeiro fazemos a conexão
+    client = Conection()
+
+    data = QueryAll(sheet_id, client, col, valor)    
+
+    return {"data": data}
+
+
+
+''' 
+    Inserte de dados por lote
+'''
+@app.post('/insertsheet')
+async def insert_sheet(sheet_id:str, name_pla:str, data:list):
+    pass
+
+
+''' 
+    Inserte de dados unico
+'''
+@app.post('/insertsheetone')
+async def insert_sheet(sheet_id:str, name_pla:str, data:list):
+    pass
+
+
 
 
 ## Deixar a class para depois fazer o mais cru primeiro
