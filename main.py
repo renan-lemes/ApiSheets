@@ -12,9 +12,7 @@ from google_auth_oauthlib.flow import InstalledAppFlow
 from googleapiclient.discovery import build
 from googleapiclient.errors import HttpError
 
-
-
-
+## Libs distintas
 # import gspread
 # from google.oauth2.credentials import Credentials
 # from google.auth.transport.requests import Request
@@ -26,9 +24,6 @@ import os
 ## ------------------------------------------------------- ## 
 app = FastAPI()
 
-''' 
-    Metodos da API
-'''
 
 # import gspread
 # from google.oauth2.credentials import Credentials
@@ -36,13 +31,6 @@ app = FastAPI()
 
 app = FastAPI()
 
-def Read_Sheets (SAMPLE_SPREADSHEET_ID, creds, range_page='Página1!A1:Z10000'):
-    service = build('sheets', 'v4', credentials=creds)
-    sheet = service.spreadsheets() ## Pegou o arquivo inteiro 
-    result = sheet.values().get(spreadsheetId=SAMPLE_SPREADSHEET_ID, range=range_page).execute()
-    values = result.get('values', [])
-
-    return values
 
 def Conection (SCOPES = ['https://www.googleapis.com/auth/spreadsheets']):
     creds = None
@@ -67,6 +55,15 @@ def Conection (SCOPES = ['https://www.googleapis.com/auth/spreadsheets']):
     
     return creds
 
+def Read_Sheets (SAMPLE_SPREADSHEET_ID, creds, range_page='Página1!A1:Z10000'):
+    service = build('sheets', 'v4', credentials=creds)
+    sheet = service.spreadsheets() ## Pegou o arquivo inteiro 
+    result = sheet.values().get(spreadsheetId=SAMPLE_SPREADSHEET_ID, range=range_page).execute()
+    values = result.get('values', [])
+
+    return values
+
+
 def QueryAll (sheet_id, client,col, valor):
     
     
@@ -79,6 +76,31 @@ def QueryAll (sheet_id, client,col, valor):
 
     return values
 
+def Insert_data(sheet_id, client, name_pag, data):
+
+    service = build('sheets', 'v4', credentials=client)
+    sheet = service.spreadsheets() ## Pegou o arquivo inteiro 
+
+    att_range = f"{name_pag}!A1"
+
+    
+
+    # print(data['data'])
+    res = data['data']
+    
+    spreedsheets = {
+        'properties':{
+            'title':name_pag
+        },
+        'values':res
+    }
+
+    result = sheet.create(body=spreedsheets, fields = sheet_id)
+    
+    # result = sheet.values().update(spreadsheetId=sheet_id, range=att_range, valueInputOption='USER_ENTERED', body=spreedsheets).execute()
+
+    return result
+
 
 '''  
     Ler planilha com base em um range do usuario 
@@ -89,7 +111,9 @@ async def read_google_sheet(sheet_id: str, range_pag:str):
     
     # Conectar ao Google Sheets
     client = Conection()
-    # print(client)
+    
+
+
     data = Read_Sheets(sheet_id, client, range_pag)
 
     return {"data": data}
@@ -108,19 +132,24 @@ async def query_sheet(sheet_id:str, col:str, valor: str):
     return {"data": data}
 
 
+''' 
+    Inserir de dados por em lote
+'''
+
+@app.post('/insertsheetall')
+async def insert_sheet(sheet_id:str, name_pag:str, data:dict):
+    
+    client = Conection()
+    
+    result = Insert_data(sheet_id, client, name_pag, data)
+
+    return {"data":result}
+
 
 ''' 
-    Inserte de dados por em lote
+    Atualizar planilha
 '''
-@app.post('/insertsheet')
-async def insert_sheet(sheet_id:str, name_pla:str, data:list):
-    pass
-
-
-''' 
-    Inserte de dados unico em uma coluna especifica
-'''
-@app.post('/insertsheetone')
+@app.post('/updatesheets')
 async def insert_sheet(sheet_id:str, name_pla:str, data:list):
     pass
 
