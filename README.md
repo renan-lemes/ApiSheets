@@ -4,3 +4,9 @@
 * Comandos para rodar localmente
     uvicorn main:app --reload
 
+* Dependencias :
+    * uvicorn
+    * FastAPI
+    * google-api-python-client google-auth-httplib2 google-auth-oauthlib
+
+ 
