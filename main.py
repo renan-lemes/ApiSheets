@@ -73,7 +73,7 @@ def Search (sheet_id, client,col, valor):
 
     return values
 
-def Insert_data(sheet_id, client, name_pag, data):
+def Insert_data_pag(sheet_id, client, name_pag, data):
 
     service = build('sheets', 'v4', credentials=client)
     
@@ -91,6 +91,37 @@ def Insert_data(sheet_id, client, name_pag, data):
 
     return result
 
+def return_dataframe(data:list):
+    ''' 
+        Função destinada pegar valores da planilha já inserido e retornar o valor digitado na busca
+    '''
+    colunas = data[0]
+    valores = data[1:]
+    df = pd.DataFrame(valores, columns=colunas)
+    return df
+
+def df_now(data:list):
+    df = pd.DataFrame(data)
+    return df
+
+def Update_data_pag (sheet_id, client, name_pag, data):
+    service = build('sheets', 'v4', credentials=client)
+    
+    sheet = service.spreadsheets() ## Pegou o arquivo inteiro 
+    result = sheet.values().get(spreadsheetId=sheet_id, range=name_pag).execute()
+    response = result.get('values', [])
+
+    data = data['data']
+
+    
+    df1 = df_now(data)
+    df2 = df_now(response)
+    df = pd.concat([df2, df1], axis=0).fillna('')
+    list_df = df.values.tolist()
+
+    result = sheet.values().update(spreadsheetId=sheet_id, range=name_pag, valueInputOption='USER_ENTERED', body={"values":list_df}).execute()
+    
+    return result
 
 '''  
     Ler planilha com base em um range do usuario 
@@ -127,15 +158,20 @@ async def query_sheet(sheet_id:str, name_pag:str, col:str, valor: str):
 async def insertsheetspag(sheet_id:str, name_pag:str, data:dict):
 
     client = Conection()    
-    result = Insert_data(sheet_id, client, name_pag, data)
+    result = Insert_data_pag(sheet_id, client, name_pag, data)
 
     return {"data":result}
 
+
 ''' 
-    Atualizar planilha
+    Atualizar planilha pag
 '''
 @app.post('/updatesheetspag')
-async def update_sheets(sheet_id:str, name_pag:str, data:list):
-    pass
+async def update_sheets(sheet_id:str, name_pag:str, data:dict):
+    
+    client = Conection()
+    result = Update_data_pag(sheet_id, client, name_pag, data)
+    
+    return result
 
 
