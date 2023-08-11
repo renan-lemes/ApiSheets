@@ -64,40 +64,30 @@ def Read_Sheets (SAMPLE_SPREADSHEET_ID, creds, range_page='Página1!A1:Z10000'):
     return values
 
 
-def QueryAll (sheet_id, client,col, valor):
-    
+def Search (sheet_id, client,col, valor):
     
     service = build('sheets', 'v4', credentials=client) 
     sheet = service.spreadsheets()
-    query = f'SELECT * WHERE {col} = {valor}'
     
-    result = sheet.values().get(spreadsheetId=sheet_id, filter = query).execute()
-    values = result.get('values', [])
+    values = 0
 
     return values
 
 def Insert_data(sheet_id, client, name_pag, data):
 
     service = build('sheets', 'v4', credentials=client)
+    
     sheet = service.spreadsheets() ## Pegou o arquivo inteiro 
 
-    att_range = f"{name_pag}!A1"
-
-    
-
-    # print(data['data'])
     res = data['data']
     
-    spreedsheets = {
-        'properties':{
-            'title':name_pag
-        },
-        'values':res
-    }
-
-    result = sheet.create(body=spreedsheets, fields = sheet_id)
+    # spreedsheets = {
+    #     'majorDimension':"ROWS",
+    #     'range':att_range,
+    #     'values':res
+    # }
     
-    # result = sheet.values().update(spreadsheetId=sheet_id, range=att_range, valueInputOption='USER_ENTERED', body=spreedsheets).execute()
+    result = sheet.values().update(spreadsheetId=sheet_id,range=name_pag+'!A1', valueInputOption='USER_ENTERED', body={'values':res}).execute()
 
     return result
 
@@ -112,8 +102,6 @@ async def read_google_sheet(sheet_id: str, range_pag:str):
     # Conectar ao Google Sheets
     client = Conection()
     
-
-
     data = Read_Sheets(sheet_id, client, range_pag)
 
     return {"data": data}
@@ -122,55 +110,32 @@ async def read_google_sheet(sheet_id: str, range_pag:str):
 '''
     Pegar dados especifico do googlesheets
 '''
-@app.get('/querysheet')
-async def query_sheet(sheet_id:str, col:str, valor: str):
+@app.get('/searchsheetpag')
+async def query_sheet(sheet_id:str, name_pag:str, col:str, valor: str):
     # Primeiro fazemos a conexão
     client = Conection()
 
-    data = QueryAll(sheet_id, client, col, valor)    
+    data = Search(sheet_id, client, col, valor)    
 
     return {"data": data}
-
 
 ''' 
     Inserir de dados por em lote
 '''
 
-@app.post('/insertsheetall')
-async def insert_sheet(sheet_id:str, name_pag:str, data:dict):
-    
-    client = Conection()
-    
+@app.post('/insertsheetspag')
+async def insertsheetspag(sheet_id:str, name_pag:str, data:dict):
+
+    client = Conection()    
     result = Insert_data(sheet_id, client, name_pag, data)
 
     return {"data":result}
 
-
 ''' 
     Atualizar planilha
 '''
-@app.post('/updatesheets')
-async def insert_sheet(sheet_id:str, name_pla:str, data:list):
+@app.post('/updatesheetspag')
+async def update_sheets(sheet_id:str, name_pag:str, data:list):
     pass
 
 
-
-
-## Deixar a class para depois fazer o mais cru primeiro
-# class GoogleSheets:
-    
-#     def Conection (self,args):
-#         pass
-
-#     def Read (self, args):
-#         pass
-
-#     def Update (self, args):
-#         pass
-
-#     def Delete (self, args):
-#         pass
-
-#     pass
-
-# print("ola")
