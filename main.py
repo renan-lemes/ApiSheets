@@ -64,14 +64,27 @@ def Read_Sheets (SAMPLE_SPREADSHEET_ID, creds, range_page='Página1!A1:Z10000'):
     return values
 
 
-def Search (sheet_id, client,col, valor):
+def Search (sheet_id, client,name_pag, valor):
     
     service = build('sheets', 'v4', credentials=client) 
     sheet = service.spreadsheets()
     
-    values = 0
+    result = sheet.values().get(spreadsheetId=sheet_id, range=name_pag).execute()
+    response = result.get('values', [])
 
-    return values
+    df = pd.DataFrame(response)
+
+    df.reset_index(drop=True, inplace=True)
+    
+    for i in df.columns:
+        if (len(df[df[i] == valor]) > 0):
+            value = df[df[i] == valor]
+        else :
+            value = pd.DataFrame()
+
+    value = value.values.tolist()
+
+    return value
 
 def Insert_data_pag(sheet_id, client, name_pag, data):
 
@@ -139,14 +152,18 @@ async def read_google_sheet(sheet_id: str, range_pag:str):
 
 
 '''
-    Pegar dados especifico do googlesheets
+    Pegar dados especifico do googlesheets 
+    Ja fiz o tratamento se ele não existir no df.
 '''
 @app.get('/searchsheetpag')
-async def query_sheet(sheet_id:str, name_pag:str, col:str, valor: str):
+async def searchsheetpag(sheet_id:str, name_pag:str, value: str):
     # Primeiro fazemos a conexão
     client = Conection()
 
-    data = Search(sheet_id, client, col, valor)    
+    data = Search(sheet_id, client, name_pag, value)
+
+    if (len(data) == 0 ):
+        data = 'Valor não encontrado !!'  
 
     return {"data": data}
 
