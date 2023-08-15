@@ -55,7 +55,7 @@ def Conection (SCOPES = ['https://www.googleapis.com/auth/spreadsheets']):
     
     return creds
 
-def Read_Sheets (SAMPLE_SPREADSHEET_ID, creds, range_page='Página1!A1:Z10000'):
+def Read_Sheets (SAMPLE_SPREADSHEET_ID, creds, range_page='Página1'):
     service = build('sheets', 'v4', credentials=creds)
     sheet = service.spreadsheets() ## Pegou o arquivo inteiro 
     result = sheet.values().get(spreadsheetId=SAMPLE_SPREADSHEET_ID, range=range_page).execute()
@@ -75,14 +75,16 @@ def Search (sheet_id, client,name_pag, valor):
     df = pd.DataFrame(response)
 
     df.reset_index(drop=True, inplace=True)
+    value = None
     
     for i in df.columns:
         if (len(df[df[i] == valor]) > 0):
             value = df[df[i] == valor]
-        else :
-            value = pd.DataFrame()
 
-    value = value.values.tolist()
+    if value == None:
+        value = 'Valor não encontrado!!'
+    else:
+        value = value.values.tolist()
 
     return value
 
