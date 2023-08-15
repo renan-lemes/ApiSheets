@@ -75,13 +75,15 @@ def Search (sheet_id, client,name_pag, valor):
     df = pd.DataFrame(response)
 
     df.reset_index(drop=True, inplace=True)
+
     value = None
-    
+
     for i in df.columns:
         if (len(df[df[i] == valor]) > 0):
             value = df[df[i] == valor]
+            break
 
-    if value == None:
+    if value is None or len(value) == 0:
         value = 'Valor não encontrado!!'
     else:
         value = value.values.tolist()
@@ -151,7 +153,6 @@ async def read_google_sheet(sheet_id: str, range_pag:str):
     data = Read_Sheets(sheet_id, client, range_pag)
 
     return {"data": data}
-
 
 '''
     Pegar dados especifico do googlesheets 
