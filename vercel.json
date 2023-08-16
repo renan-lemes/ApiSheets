@@ -1,6 +1,9 @@
 {
     "builds": [
       {
+        "scripts": {
+            "install": "pip install -r /vercel/path0/requirements.txt"
+        },
         "src": "api/main.py",
         "use": "@vercel/python",
         "config": {
