@@ -140,6 +140,13 @@ def Update_data_pag (sheet_id, client, name_pag, data):
     
     return result
 
+
+@app.get("/")
+async def root():
+
+    return {"data":"Hello "}
+
+
 '''  
     Ler planilha com base em um range do usuario 
     Futuramente posso alterar os dados como eu bem queira
