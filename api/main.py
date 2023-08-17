@@ -56,13 +56,15 @@ def Conection (SCOPES = ['https://www.googleapis.com/auth/spreadsheets']):
     return creds
 
 def Read_Sheets (SAMPLE_SPREADSHEET_ID, creds, range_page='Página1'):
-    service = build('sheets', 'v4', credentials=creds)
-    sheet = service.spreadsheets() ## Pegou o arquivo inteiro 
-    result = sheet.values().get(spreadsheetId=SAMPLE_SPREADSHEET_ID, range=range_page).execute()
-    values = result.get('values', [])
+    try:
+        service = build('sheets', 'v4', credentials=creds)
+        sheet = service.spreadsheets() ## Pegou o arquivo inteiro 
+        result = sheet.values().get(spreadsheetId=SAMPLE_SPREADSHEET_ID, range=range_page).execute()
+        values = result.get('values', [])
 
-    return values
-
+        return values
+    except Exception as e:
+        return f"Error reading sheets{e}"
 
 def Search (sheet_id, client,name_pag, valor):
     
