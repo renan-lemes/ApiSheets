@@ -25,13 +25,6 @@ import os
 app = FastAPI()
 
 
-# import gspread
-# from google.oauth2.credentials import Credentials
-# from google.auth.transport.requests import Request
-
-app = FastAPI()
-
-
 def Conection (SCOPES = ['https://www.googleapis.com/auth/spreadsheets']):
     creds = None
 
@@ -167,7 +160,7 @@ async def read_google_sheet(sheet_id: str, range_pag:str):
 '''
 @app.get('/searchsheetpag')
 async def searchsheetpag(sheet_id:str, name_pag:str, value: str):
-    # Primeiro fazemos a conexão
+
     client = Conection()
 
     data = Search(sheet_id, client, name_pag, value)
