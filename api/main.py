@@ -115,7 +115,7 @@ def df_now(data:list):
     df = pd.DataFrame(data)
     return df
 
-def Update_data_pag (sheet_id, client, name_pag, data):
+def Update_data_pag(sheet_id, client, name_pag, data):
     service = build('sheets', 'v4', credentials=client)
     
     sheet = service.spreadsheets() ## Pegou o arquivo inteiro 
