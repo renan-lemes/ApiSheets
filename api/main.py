@@ -33,13 +33,16 @@ app = FastAPI()
 ## Carrega o a cred
 api_key = os.getenv("API_KEY")
 
+## Conexão
 def Conection(SCOPES = ['https://www.googleapis.com/auth/spreadsheets']):
 
     try:
         if not api_key:
             raise ValueError("API_KEY não encontrada. Verifique seu arquivo .env")
+        
+        service = build('sheets', 'v4', developerKey=api_key)
 
-        return api_key
+        return service
     except Exception as e :
         return f"Not found creds {e}"
 
@@ -54,6 +57,42 @@ def Read_Sheets(SAMPLE_SPREADSHEET_ID, range_page='Página1'):
         return values
     except Exception as e:
         return f"Error reading sheets{e}"
+    
+def Create_new_page(service, spreadsheet_id: str, title: str, row_count: int = 1000, col_count: int = 26):
+    """
+    Cria uma nova aba (sheet) na planilha.
+
+    :param service: objeto retornado por build('sheets', 'v4', ...)
+    :param spreadsheet_id: ID da planilha (string)
+    :param title: título da nova aba
+    :param row_count: número de linhas iniciais (opcional)
+    :param col_count: número de colunas iniciais (opcional)
+    """
+    requests = [{
+        "addSheet": {
+            "properties": {
+                "title": title,
+                "gridProperties": {
+                    "rowCount": row_count,
+                    "columnCount": col_count
+                }
+            }
+        }
+    }]
+
+    body = {"requests": requests}
+    
+
+    response = service.spreadsheets().batchUpdate(
+        spreadsheetId=spreadsheet_id,
+        body=body
+    ).execute()
+
+    # Retorna o ID da nova aba (sheetId)
+    sheet_id = response['replies'][0]['addSheet']['properties']['sheetId']
+    print(f"Aba '{title}' criada com sheetId: {sheet_id}")
+    return sheet_id
+
 
 def Search(sheet_id, client,name_pag, valor):
     
@@ -194,4 +233,15 @@ async def update_sheets(sheet_id:str, name_pag:str, data:dict):
     
     return result
 
+'''
+    Criando uma nova aba para a planilha 
+'''
 
+@app.post('/createpag')
+async def create_pag(sheet_id:str, title):
+    
+    service = Conection()
+
+    result = Create_new_page(service, sheet_id, title)
+
+    return result
