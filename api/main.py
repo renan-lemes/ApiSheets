@@ -18,35 +18,35 @@ from googleapiclient.errors import HttpError
 # from google.auth.transport.requests import Request
 # from google.oauth2.service_account import Credentials
 
-import json
+import json 
 import os
 
+from dotenv import load_dotenv
+
 ## ------------------------------------------------------- ## 
+## Inicializa a credencial
+load_dotenv()
+
+## Inicializa a API
 app = FastAPI()
 
+## Carrega o a cred
+api_key = os.getenv("API_KEY")
 
 def Conection(SCOPES = ['https://www.googleapis.com/auth/spreadsheets']):
-    creds = None
 
     try:
-        creds = None
-        
-        # The file token.json stores the user's access and refresh tokens, and is
-        # created automatically when the authorization flow completes for the first
-        # time.
-        
-        ## Carrega a credencial nova 
-        api_key = os.get("API_KEY")
-        
         if not api_key:
-            raise ValueError("API_KEY não encontrada no arquivo .env")
+            raise ValueError("API_KEY não encontrada. Verifique seu arquivo .env")
+
         return api_key
     except Exception as e :
         return f"Not found creds {e}"
 
-def Read_Sheets (SAMPLE_SPREADSHEET_ID, creds, range_page='Página1'):
+def Read_Sheets(SAMPLE_SPREADSHEET_ID, range_page='Página1'):
     try:
-        service = build('sheets', 'v4', credentials=creds)
+        
+        service = build('sheets', 'v4', developerKey=api_key)
         sheet = service.spreadsheets() ## Pegou o arquivo inteiro 
         result = sheet.values().get(spreadsheetId=SAMPLE_SPREADSHEET_ID, range=range_page).execute()
         values = result.get('values', [])
@@ -145,9 +145,9 @@ async def root():
 async def read_google_sheet(sheet_id: str, range_pag:str):
     
     # Conectar ao Google Sheets
-    client = Conection()
+    cred = api_key
     
-    data = Read_Sheets(sheet_id, client, range_pag)
+    data = Read_Sheets(sheet_id, cred, range_pag)
 
     return {"data": data}
 
