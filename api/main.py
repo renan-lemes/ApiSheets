@@ -25,25 +25,22 @@ import os
 app = FastAPI()
 
 
-def Conection (SCOPES = ['https://www.googleapis.com/auth/spreadsheets']):
+def Conection(SCOPES = ['https://www.googleapis.com/auth/spreadsheets']):
     creds = None
 
     try:
-        if os.path.exists('token.json'):
-            creds = Credentials.from_authorized_user_file('token.json', SCOPES)
-        # If there are no (valid) credentials available, let the user log in.
-        if not creds or not creds.valid:
-            if creds and creds.expired and creds.refresh_token:
-                creds.refresh(Request())
-            else:
-                flow = InstalledAppFlow.from_client_secrets_file(
-                    'client_secret.json', SCOPES)
-                creds = flow.run_local_server(port=0)
-            # Save the credentials for the next run
-            with open('token.json', 'w') as token:
-                token.write(creds.to_json())
+        creds = None
         
-        return creds
+        # The file token.json stores the user's access and refresh tokens, and is
+        # created automatically when the authorization flow completes for the first
+        # time.
+        
+        ## Carrega a credencial nova 
+        api_key = os.get("API_KEY")
+        
+        if not api_key:
+            raise ValueError("API_KEY não encontrada no arquivo .env")
+        return api_key
     except Exception as e :
         return f"Not found creds {e}"
 
@@ -58,7 +55,7 @@ def Read_Sheets (SAMPLE_SPREADSHEET_ID, creds, range_page='Página1'):
     except Exception as e:
         return f"Error reading sheets{e}"
 
-def Search (sheet_id, client,name_pag, valor):
+def Search(sheet_id, client,name_pag, valor):
     
     service = build('sheets', 'v4', credentials=client) 
     sheet = service.spreadsheets()
