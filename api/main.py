@@ -131,6 +131,9 @@ def Update_data_pag(sheet_id, client, name_pag, data):
     
     return result
 
+## ---------------------------------------------------------------------------------------------------------------------------------------------- ##
+##                                                          As rotas da api 
+
 
 @app.get("/")
 async def root():
